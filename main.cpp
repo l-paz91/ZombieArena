@@ -2,6 +2,7 @@
 
 //--INCLUDES--//
 #include "Player.h"
+#include "ZombieArena.h"
 
 #include "std_lib_facilities.h"
 
@@ -33,6 +34,10 @@ int main()
 	Player player;
 
 	IntRect arena;
+
+	VertexArray background;
+	Texture tBackground;
+	tBackground.loadFromFile("graphics/background_sheet.png");
 
 	while (window.isOpen())
 	{
@@ -108,11 +113,11 @@ int main()
 
 			if (Keyboard::isKeyPressed(Keyboard::D))
 			{
-				player.moveDown();
+				player.moveRight();
 			}
 			else
 			{
-				player.stopDown();
+				player.stopRight();
 			}
 		} // end WASD handling
 
@@ -157,7 +162,10 @@ int main()
 				arena.left = 0;
 				arena.top = 0;
 
-				int tilesize = 50;
+				// pass the vertex array by ref to create background
+				int tilesize = ZombieArena::createBackground(background, arena);
+
+				//int tilesize = 50;
 				player.spawn(arena, resolution, tilesize);
 
 				// reset clock
@@ -188,6 +196,7 @@ int main()
 		{
 			window.clear();
 			window.setView(mainView);
+			window.draw(background, &tBackground);
 			window.draw(player.getSprite());
 		}
 

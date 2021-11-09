@@ -99,7 +99,7 @@ void Player::update(float pElapsedTime, Vector2i pMousePos)
 		mPos.x = (float)(mArena.left + mTileSize);
 	}
 
-	if (mPos.y < mArena.height - mTileSize)
+	if (mPos.y > mArena.height - mTileSize)
 	{
 		mPos.y = (float)(mArena.height - mTileSize);
 	}
