@@ -4,8 +4,6 @@
 #include "Player.h"
 #include "ZombieArena.h"
 
-#include "std_lib_facilities.h"
-
 //---GLOBALS--//
 enum class State
 {
@@ -38,6 +36,9 @@ int main()
 	VertexArray background;
 	Texture tBackground;
 	tBackground.loadFromFile("graphics/background_sheet.png");
+
+	// create the arena
+	ZombieArena zombieArena;
 
 	while (window.isOpen())
 	{
@@ -163,7 +164,7 @@ int main()
 				arena.top = 0;
 
 				// pass the vertex array by ref to create background
-				int tilesize = ZombieArena::createBackground(background, arena);
+				int tilesize = zombieArena.createBackground(background, arena);
 
 				//int tilesize = 50;
 				player.spawn(arena, resolution, tilesize);

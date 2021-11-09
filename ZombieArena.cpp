@@ -17,7 +17,7 @@ int ZombieArena::createBackground(VertexArray& pVA, IntRect pArena)
 	pVA.resize(worldWidth * worldHeight * VERTS_IN_QUAD);
 
 	int currentVertex = 0;
-	
+
 	for (int w = 0; w < worldWidth; ++w)
 	{
 		for (int h = 0; h < worldHeight; ++h)
@@ -57,6 +57,13 @@ int ZombieArena::createBackground(VertexArray& pVA, IntRect pArena)
 	}
 
 	return TILE_SIZE;
+}
+
+// -----------------------------------------------------------------------------
+
+void ZombieArena::createHorde(int pNumZombies, IntRect pArena)
+{
+
 }
 
 // -----------------------------------------------------------------------------

@@ -6,16 +6,19 @@
 //--INCLUDES--//
 #include <SFML/Graphics.hpp>
 
-#include "std_lib_facilities.h"
+#include "Zombie.h"
 
 // -----------------------------------------------------------------------------
 
 using namespace sf;
 
-namespace ZombieArena
+struct ZombieArena
 {
-	extern int createBackground(VertexArray& pVA, IntRect pArena);
-}
+	int createBackground(VertexArray& pVA, IntRect pArena);
+	void createHorde(int pNumZombies, IntRect pArena);
+
+	vector<Zombie> mv_Zombies;
+};
 
 // -----------------------------------------------------------------------------
 // -----------------------------------------------------------------------------
