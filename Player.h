@@ -52,8 +52,6 @@ private:
 
 	Sprite mSprite;
 
-	Texture mTexture;
-
 	Time mLastHit;
 
 	const float mStartSpeed;

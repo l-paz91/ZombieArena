@@ -63,6 +63,78 @@ int ZombieArena::createBackground(VertexArray& pVA, IntRect pArena)
 
 void ZombieArena::createHorde(int pNumZombies, IntRect pArena)
 {
+	if (!mv_Zombies.empty())
+	{
+		for (int i = 0; i < mv_Zombies.size(); ++i)
+		{
+			delete mv_Zombies[i];
+		}
+		mv_Zombies.clear();
+	}
+
+	int maxy = pArena.height - 20;
+	int miny = pArena.top + 20;
+	int maxx = pArena.width - 20;
+	int minx = pArena.left + 20;
+
+	for (int i = 0; i < pNumZombies; ++i)
+	{
+		// which side should the zombie spawn?
+		srand((int)time(0) * i);
+		int side = (rand() % 4);
+
+		int x = 0;
+		int y = 0;
+
+		switch (side)
+		{
+		case 0:
+			// left
+			x = minx;
+			y = (rand() % maxy) + miny;
+			break;
+		case 1:
+			// right
+			x = maxx;
+			y = (rand() % maxy) + miny;
+			break;
+		case 2:
+			// top
+			x = (rand() % maxx) + minx;
+			y = miny;
+			break;
+		case 3:
+			// bottom
+			x = (rand() % maxx) + minx;
+			y = maxy;
+			break;
+		default:
+			cout << "How did we get here?";
+			break;
+		}
+
+		// bloater, crawler or runner
+		srand((int)time(0) * i * 2);
+		int type = (rand() % 3);
+		switch (type)
+		{
+		case 0: case 1:
+			mv_Zombies.push_back(new ZombieBloater());
+			break;
+		case 2:
+			mv_Zombies.push_back(new ZombieChaser());
+			break;
+		case 3:
+			mv_Zombies.push_back(new ZombieCrawler());
+			break;
+		default:
+			cout << "How did we get here?";
+			break;
+		}
+
+		mv_Zombies[i]->spawn((float)x, (float)y, i);
+
+	}
 
 }
 

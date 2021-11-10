@@ -15,9 +15,9 @@ using namespace sf;
 class Zombie
 {
 public:
-	Zombie();
+	Zombie(int pMaxSpeed, int pMaxHealth);
 	
-	virtual void spawn(float pStartX, float pStartY, int pSeed);
+	virtual void spawn(float pStartX, float pStartY, int pSeed, const string& pFilename = "");
 
 	void update(float pElapsedTime, Vector2f pPlayerLoc);
 	bool hit();
@@ -29,6 +29,8 @@ public:
 protected:
 	using Super = Zombie;	// make it more explicit that we're calling the base in derived types
 
+	const int MAX_SPEED;
+	const int MAX_HEALTH;
 	const int MAX_VARIANCE;
 	const int OFFSET;
 
@@ -47,11 +49,7 @@ class ZombieBloater : public Zombie
 public:
 	ZombieBloater();
 
-	virtual void spawn(float pStartX, float pStartY, int pSeed);
-
-private:
-	const float BLOATER_SPEED;
-	const float BLOATER_HEALTH;
+	virtual void spawn(float pStartX, float pStartY, int pSeed, const string& pFilename = "");
 };
 
 // -----------------------------------------------------------------------------
@@ -61,11 +59,7 @@ class ZombieChaser : public Zombie
 public:
 	ZombieChaser();
 
-	virtual void spawn(float pStartX, float pStartY, int pSeed);
-
-private:
-	const float CHASER_SPEED;
-	const float CHASER_HEALTH;
+	virtual void spawn(float pStartX, float pStartY, int pSeed, const string& pFilename = "");
 };
 
 // -----------------------------------------------------------------------------
@@ -75,11 +69,7 @@ class ZombieCrawler : public Zombie
 public:
 	ZombieCrawler();
 
-	virtual void spawn(float pStartX, float pStartY, int pSeed);
-
-private:
-	const float CRAWLER_SPEED;
-	const float CRAWLER_HEALTH;
+	virtual void spawn(float pStartX, float pStartY, int pSeed, const string& pFilename = "");
 };
 
 // -----------------------------------------------------------------------------

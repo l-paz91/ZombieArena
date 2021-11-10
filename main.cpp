@@ -2,6 +2,7 @@
 
 //--INCLUDES--//
 #include "Player.h"
+#include "TextureHolder.h"
 #include "ZombieArena.h"
 
 //---GLOBALS--//
@@ -34,11 +35,16 @@ int main()
 	IntRect arena;
 
 	VertexArray background;
-	Texture tBackground;
-	tBackground.loadFromFile("graphics/background_sheet.png");
+	const string bgFilename = "graphics/background_sheet.png";
+
+	// prepare for a horde of zombies
+	int numZombies = 0;
+	int numZombiesAlive = 0;
 
 	// create the arena
 	ZombieArena zombieArena;
+	const int ARENA_WIDTH = 1000;
+	const int ARENA_HEIGHT = 1000;
 
 	while (window.isOpen())
 	{
@@ -158,16 +164,20 @@ int main()
 			if (gameState == State::ePLAYING)
 			{
 				// prepare the level
-				arena.width = 500;
-				arena.height = 500;
+				arena.width = ARENA_WIDTH;
+				arena.height = ARENA_HEIGHT;
 				arena.left = 0;
 				arena.top = 0;
 
 				// pass the vertex array by ref to create background
 				int tilesize = zombieArena.createBackground(background, arena);
-
-				//int tilesize = 50;
+		
 				player.spawn(arena, resolution, tilesize);
+
+				// create horde of zombies
+				numZombies = 10;
+				zombieArena.createHorde(numZombies, arena);
+				numZombiesAlive = numZombies;
 
 				// reset clock
 				clock.restart();
@@ -190,6 +200,16 @@ int main()
 			Vector2f playerPos(player.getCenter());
 
 			mainView.setCenter(player.getCenter());
+
+			// loop through each zombie and update them
+			for (Zombie* z : zombieArena.mv_Zombies)
+			{
+				if (z->isAlive())
+				{
+					z->update(dtAsSec, playerPos);
+				}
+			}
+
 		} // end updating scene
 
 		// ---- Draw the scene
@@ -197,7 +217,14 @@ int main()
 		{
 			window.clear();
 			window.setView(mainView);
-			window.draw(background, &tBackground);
+			window.draw(background, &TextureHolder::getTexture(bgFilename));
+
+			// draw zombies
+			for (const Zombie* z : zombieArena.mv_Zombies)
+			{
+				window.draw(z->getSprite());
+			}
+
 			window.draw(player.getSprite());
 		}
 

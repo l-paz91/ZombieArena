@@ -26,7 +26,7 @@ public:
 
 	static Texture& getTexture(const string& filename)
 	{
-		map<string, Texture> ref = getInstance().mTextures;
+		map<string, Texture>& ref = getInstance().mTextures;
 		auto it = ref.find(filename);
 		if (it != ref.end())
 		{

@@ -3,6 +3,8 @@
 //--INCLUDES--//
 #include "Player.h"
 
+#include "TextureHolder.h"
+
 // -----------------------------------------------------------------------------
 
 Player::Player()
@@ -18,8 +20,8 @@ Player::Player()
 	, mLeftPressed(false)
 	, mRightPressed(false)
 {
-	mTexture.loadFromFile("graphics/player.png");
-	mSprite.setTexture(mTexture);
+	const string filename = "graphics/player.png";
+	mSprite.setTexture(TextureHolder::getTexture(filename));
 	mSprite.setOrigin(25, 25);
 }
 

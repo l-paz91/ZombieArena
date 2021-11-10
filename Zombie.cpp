@@ -7,8 +7,10 @@
 
 // -----------------------------------------------------------------------------
 
-Zombie::Zombie()
-	: MAX_VARIANCE(30)
+Zombie::Zombie(int pMaxSpeed, int pMaxHealth)
+	: MAX_SPEED(pMaxSpeed)
+	, MAX_HEALTH(pMaxHealth)
+	, MAX_VARIANCE(30)
 	, OFFSET(101 - MAX_VARIANCE)
 	, mPos()
 	, mSprite()
@@ -19,13 +21,19 @@ Zombie::Zombie()
 
 // -----------------------------------------------------------------------------
 
-void Zombie::spawn(float pStartX, float pStartY, int pSeed)
+void Zombie::spawn(float pStartX, float pStartY, int pSeed, const string& pFilename /*= default*/)
 {
+	Texture& t = TextureHolder::getTexture(pFilename);
+	mSprite.setTexture(t);
+
+	mSpeed = (float)MAX_SPEED;
+	mHealth = (float)MAX_HEALTH;
+
 	// every zombie is unique. Create a speed modifier
 	srand((int)time(0) * pSeed);
 
 	// somewhere between 80 and 100
-	float modifier = (rand() % MAX_VARIANCE) + OFFSET;
+	float modifier = (float)(rand() % MAX_VARIANCE) + OFFSET;
 
 	// express this as a fraction of 1
 	modifier /= 100;
@@ -97,64 +105,49 @@ bool Zombie::hit()
 // -----------------------------------------------------------------------------
 
 ZombieBloater::ZombieBloater()
-	: BLOATER_SPEED(40)
-	, BLOATER_HEALTH(5)
+	: Zombie(40, 5)
 {
 }
 
 // -----------------------------------------------------------------------------
 
-void ZombieBloater::spawn(float pStartX, float pStartY, int pSeed)
+void ZombieBloater::spawn(float pStartX, float pStartY, int pSeed, const string& pFilename /*= default*/)
 {
 	const string filename = "graphics/bloater.png";
-	mSprite = Sprite(TextureHolder::getTexture(filename));
 
-	mSpeed = BLOATER_SPEED;
-	mHealth = BLOATER_HEALTH;
-
-	Super::spawn(pStartX, pStartY, pSeed);	// now finish off the "generic" part of spawning
+	Super::spawn(pStartX, pStartY, pSeed, filename);	// now finish off the "generic" part of spawning
 }
 
 // -----------------------------------------------------------------------------
 
 ZombieChaser::ZombieChaser()
-	: CHASER_SPEED(80)
-	, CHASER_HEALTH(1)
+	: Zombie(80, 1)
 {
 }
 
 // -----------------------------------------------------------------------------
 
-void ZombieChaser::spawn(float pStartX, float pStartY, int pSeed)
+void ZombieChaser::spawn(float pStartX, float pStartY, int pSeed, const string& pFilename /*= default*/)
 {
 	const string filename = "graphics/chaser.png";
-	mSprite = Sprite(TextureHolder::getTexture(filename));
-
-	mSpeed = CHASER_SPEED;
-	mHealth = CHASER_HEALTH;
-
-	Super::spawn(pStartX, pStartY, pSeed);	// now finish off the "generic" part of spawning
+	
+	Super::spawn(pStartX, pStartY, pSeed, filename);	// now finish off the "generic" part of spawning
 }
 
 // -----------------------------------------------------------------------------
 
 ZombieCrawler::ZombieCrawler()
-	: CRAWLER_SPEED(20)
-	, CRAWLER_HEALTH(3)
+	: Zombie(20, 3)
 {
 }
 
 // -----------------------------------------------------------------------------
 
-void ZombieCrawler::spawn(float pStartX, float pStartY, int pSeed)
+void ZombieCrawler::spawn(float pStartX, float pStartY, int pSeed, const string& pFilename /*= default*/)
 {
 	const string filename = "graphics/crawler.png";
-	mSprite = Sprite(TextureHolder::getTexture(filename));
-
-	mSpeed = CRAWLER_SPEED;
-	mHealth = CRAWLER_HEALTH;
-
-	Super::spawn(pStartX, pStartY, pSeed);	// now finish off the "generic" part of spawning
+	
+	Super::spawn(pStartX, pStartY, pSeed, filename);	// now finish off the "generic" part of spawning
 }
 
 // -----------------------------------------------------------------------------
