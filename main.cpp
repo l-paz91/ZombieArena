@@ -1,6 +1,8 @@
 // -----------------------------------------------------------------------------
 
 //--INCLUDES--//
+#include "Bullet.h"
+#include "Pickup.h"
 #include "Player.h"
 #include "TextureHolder.h"
 #include "ZombieArena.h"
@@ -41,6 +43,33 @@ int main()
 	int numZombies = 0;
 	int numZombiesAlive = 0;
 
+	// prepare bullets @TODO - this should be a weapon class
+	vector<Bullet> vBullets(100);
+	int currentBullet = 0;
+	int bulletsSpare = 24;
+	int bulletsInClip = 6;
+	int clipSize = 6;
+	float fireRate = 1;
+
+	// when was fire button last pressed?
+	Time fireButtonLastPressed;
+
+	// hide mouse and pointer and replace with crosshair
+	window.setMouseCursorVisible(false);
+
+	Sprite sCrosshair;
+	string const chFilename = "graphics/crosshair.png";
+	sCrosshair.setTexture(TextureHolder::getTexture(chFilename));
+	sCrosshair.setOrigin(25, 25);
+
+	// create a couple of pickups
+	Pickup healthPickUp(1);
+	Pickup ammoPickUp(2);
+
+	// game info
+	int score = 0;
+	int hiScore = 0;
+
 	// create the arena
 	ZombieArena zombieArena;
 	const int ARENA_WIDTH = 1000;
@@ -75,9 +104,26 @@ int main()
 
 				if (gameState == State::ePLAYING)
 				{
-
-				}
-			
+					// reloading
+					if (event.key.code == Keyboard::R)
+					{
+						if (bulletsSpare >= clipSize)
+						{
+							// reload
+							bulletsInClip = clipSize;
+							bulletsSpare -= clipSize;
+						}
+						else if (bulletsSpare > 0)
+						{
+							bulletsInClip = bulletsSpare;
+							bulletsSpare = 0;
+						}
+						else
+						{
+							// ?
+						}
+					}
+				}		
 			}
 
 		} // end event polling
@@ -126,6 +172,30 @@ int main()
 			{
 				player.stopRight();
 			}
+
+			if (Mouse::isButtonPressed(Mouse::Left))
+			{
+				if (gameTimeTotal.asMilliseconds() - fireButtonLastPressed.asMilliseconds()
+					> 1000 / fireRate && bulletsInClip > 0)
+				{
+					// pass centre of player and cross-hair to shoot function
+					vBullets[currentBullet].shoot(
+						player.getCenter().x, player.getCenter().y,
+						mouseWorldPos.x, mouseWorldPos.y);
+
+					++currentBullet;
+
+					if (currentBullet > 99)
+					{
+						currentBullet = 0;
+					}
+
+					fireButtonLastPressed = gameTimeTotal;
+					--bulletsInClip;
+				} 
+
+			} // end fire a bullet
+
 		} // end WASD handling
 
 		// handle the leveling state
@@ -174,6 +244,10 @@ int main()
 		
 				player.spawn(arena, resolution, tilesize);
 
+				// create pickups
+				healthPickUp.setArena(arena);
+				ammoPickUp.setArena(arena);
+
 				// create horde of zombies
 				numZombies = 10;
 				zombieArena.createHorde(numZombies, arena);
@@ -195,6 +269,9 @@ int main()
 			mouseScreenPos = Mouse::getPosition();
 			mouseWorldPos = window.mapPixelToCoords(Mouse::getPosition(), mainView);
 
+			// set the cross hair to the mouse world location
+			sCrosshair.setPosition(mouseWorldPos);
+
 			// update the player
 			player.update(dtAsSec, Mouse::getPosition());
 			Vector2f playerPos(player.getCenter());
@@ -208,6 +285,86 @@ int main()
 				{
 					z->update(dtAsSec, playerPos);
 				}
+			}
+
+			// update any bullets
+			for (int i = vBullets.size()-1; i >= 0; --i)
+			{
+				if (vBullets[i].isInFlight())
+				{
+					vBullets[i].update(dtAsSec);
+				}
+				
+				if(vBullets[i].isOutOfRange())
+				{
+					// remove from vector so it doesn't clog the game up
+					vBullets.erase(vBullets.begin() + i);
+				}
+			}
+
+			// update pickups
+			healthPickUp.update(dtAsSec);
+			ammoPickUp.update(dtAsSec);
+
+			// have any zombies been shot?
+			for (Bullet& b : vBullets)
+			{
+				for (Zombie* z : zombieArena.mv_Zombies)
+				{
+					if (b.isInFlight() && z->isAlive())
+					{
+						if (b.getPos().intersects(z->getPos()))
+						{
+							// stop the bullet
+							b.stop();
+
+							// register the hit and see if it was a kill
+							if (z->hit())
+							{
+								score += 10;
+								if (score >= hiScore)
+								{
+									hiScore = score;
+								}
+								--numZombiesAlive;
+								// when all zombies are dead 
+								if (numZombiesAlive == 0)
+								{
+									gameState = State::eLEVELING_UP;
+								}
+							}
+						}
+					}
+				}
+			} // end zombie being shot
+
+			// have any zombies touched the player?
+			for (Zombie* z : zombieArena.mv_Zombies) 
+			{
+				if (player.getPos().intersects(z->getPos()) && z->isAlive())
+				{
+					if (player.hit(gameTimeTotal))
+					{
+						// more here later
+					}
+
+					if (player.getHealth() <= 0)
+					{
+						gameState = State::eGAMEOVER;
+					}
+				}
+			} // end player touched
+
+			// has player walked over pickup
+			if (player.getPos().intersects(healthPickUp.getPos()) && healthPickUp.hasSpawned())
+			{
+				player.increaseHealthLevel(healthPickUp.pickUp());
+			}
+
+			// has player touched ammo pickup
+			if (player.getPos().intersects(ammoPickUp.getPos()) && ammoPickUp.hasSpawned())
+			{
+				bulletsSpare = ammoPickUp.pickUp();
 			}
 
 		} // end updating scene
@@ -225,7 +382,28 @@ int main()
 				window.draw(z->getSprite());
 			}
 
+			// draw bullets
+			for (const Bullet& b : vBullets)
+			{
+				window.draw(b.getShape());
+			}
+
+			// draw player
 			window.draw(player.getSprite());
+
+			// draw the pickups
+			if (ammoPickUp.hasSpawned())
+			{
+				window.draw(ammoPickUp.getSprite());
+			}
+
+			if (healthPickUp.hasSpawned())
+			{
+				window.draw(healthPickUp.getSprite());
+			}
+
+			// draw cross hair
+			window.draw(sCrosshair);
 		}
 
 		if (gameState == State::eLEVELING_UP)
