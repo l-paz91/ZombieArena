@@ -2,6 +2,7 @@
 
 //--INCLUDES--//
 #include "Bullet.h"
+#include "HUD.h"
 #include "Pickup.h"
 #include "Player.h"
 #include "TextureHolder.h"
@@ -21,7 +22,7 @@ int main()
 
 	Vector2f resolution((float)VideoMode::getDesktopMode().width, (float)VideoMode::getDesktopMode().height);
 
-	RenderWindow window(VideoMode((int)resolution.x, (int)resolution.y), "Zombie Arena", Style::Default);
+	RenderWindow window(VideoMode((int)resolution.x, (int)resolution.y), "Zombie Arena", Style::Fullscreen);
 
 	View mainView(FloatRect(0, 0, resolution.x, resolution.y));
 
@@ -69,6 +70,14 @@ int main()
 	// game info
 	int score = 0;
 	int hiScore = 0;
+	int wave = 0;
+
+	// create the HUD
+	Hud hud(resolution.x, resolution.y);
+	int framesSinceLastHudUpdate = 0;
+	int fpsFrameInterval = 1000;
+	hud.updateAmmoText(bulletsInClip, bulletsSpare);
+	hud.updateScoreText(score);
 
 	// create the arena
 	ZombieArena zombieArena;
@@ -122,6 +131,9 @@ int main()
 						{
 							// ?
 						}
+
+						// update HUD
+						hud.updateAmmoText(bulletsInClip, bulletsSpare);
 					}
 				}		
 			}
@@ -192,6 +204,9 @@ int main()
 
 					fireButtonLastPressed = gameTimeTotal;
 					--bulletsInClip;
+
+					// update HUD
+					hud.updateAmmoText(bulletsInClip, bulletsSpare);
 				} 
 
 			} // end fire a bullet
@@ -325,8 +340,17 @@ int main()
 								if (score >= hiScore)
 								{
 									hiScore = score;
+
+									// update HUD
+									hud.updateHiScoreText(hiScore);
 								}
+
 								--numZombiesAlive;
+
+								// update HUD
+								hud.updateScoreText(score);
+								hud.updateZombiesLeftText(numZombiesAlive);
+
 								// when all zombies are dead 
 								if (numZombiesAlive == 0)
 								{
@@ -364,8 +388,17 @@ int main()
 			// has player touched ammo pickup
 			if (player.getPos().intersects(ammoPickUp.getPos()) && ammoPickUp.hasSpawned())
 			{
-				bulletsSpare = ammoPickUp.pickUp();
+				bulletsSpare += ammoPickUp.pickUp();
+
+				// update HUD
+				hud.updateAmmoText(bulletsInClip, bulletsSpare);
 			}
+
+			// update the health bar
+			hud.mHealthBar.setSize(Vector2f(player.getHealth() * 3.0f, 50.0f));
+
+			// update Wave??? This will be moved
+			hud.updateWaveText(wave);
 
 		} // end updating scene
 
@@ -404,21 +437,28 @@ int main()
 
 			// draw cross hair
 			window.draw(sCrosshair);
+
+			// switch to HUD view && draw
+			hud.updateHUD(window);
 		}
 
 		if (gameState == State::eLEVELING_UP)
 		{
-
+			window.draw(hud.msGameOver);
+			window.draw(hud.mLevelUpText);
 		}
 
 		if (gameState == State::ePAUSED)
 		{
-
+			window.draw(hud.mPausedText);
 		}
 
 		if (gameState == State::eGAMEOVER)
 		{
-
+			window.draw(hud.msGameOver);
+			window.draw(hud.mGameOverText);
+			window.draw(hud.mScoreText);
+			window.draw(hud.mHiScoreText);
 		}
 
 		window.display();

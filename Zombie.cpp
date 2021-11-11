@@ -86,6 +86,7 @@ void Zombie::update(float pElapsedTime, Vector2f pPlayerLoc)
 
 // -----------------------------------------------------------------------------
 
+// returns true if dead
 bool Zombie::hit()
 {
 	--mHealth;

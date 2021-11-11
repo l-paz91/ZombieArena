@@ -9,7 +9,7 @@
 
 Player::Player()
 	: mStartSpeed(200)
-	, mStartHealth(100)
+	, mStartHealth(1000)
 	, mSpeed(mStartSpeed)
 	, mTileSize(50)
 	, mHealth((int)mStartHealth)
