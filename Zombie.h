@@ -6,8 +6,7 @@
 //--INCLUDES--//
 #include <SFML/Graphics.hpp>
 
-#include "std_lib_facilities.h"
-
+#include <string>
 using namespace sf;
 
 // -----------------------------------------------------------------------------
@@ -17,7 +16,7 @@ class Zombie
 public:
 	Zombie(int pMaxSpeed, int pMaxHealth);
 	
-	virtual void spawn(float pStartX, float pStartY, int pSeed, const string& pFilename = "");
+	virtual void spawn(float pStartX, float pStartY, int pSeed, const std::string& pFilename = "");
 
 	void update(float pElapsedTime, Vector2f pPlayerLoc);
 	bool hit();
@@ -49,7 +48,7 @@ class ZombieBloater : public Zombie
 public:
 	ZombieBloater();
 
-	virtual void spawn(float pStartX, float pStartY, int pSeed, const string& pFilename = "");
+	virtual void spawn(float pStartX, float pStartY, int pSeed, const std::string& pFilename = "");
 };
 
 // -----------------------------------------------------------------------------
@@ -59,7 +58,7 @@ class ZombieChaser : public Zombie
 public:
 	ZombieChaser();
 
-	virtual void spawn(float pStartX, float pStartY, int pSeed, const string& pFilename = "");
+	virtual void spawn(float pStartX, float pStartY, int pSeed, const std::string& pFilename = "");
 };
 
 // -----------------------------------------------------------------------------
@@ -69,7 +68,7 @@ class ZombieCrawler : public Zombie
 public:
 	ZombieCrawler();
 
-	virtual void spawn(float pStartX, float pStartY, int pSeed, const string& pFilename = "");
+	virtual void spawn(float pStartX, float pStartY, int pSeed, const std::string& pFilename = "");
 };
 
 // -----------------------------------------------------------------------------

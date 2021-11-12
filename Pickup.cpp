@@ -2,7 +2,10 @@
 
 //--INCLUDES--//
 #include "Pickup.h"
+
 #include "TextureHolder.h"
+
+#include "std_lib_facilities.h"
 
 // -----------------------------------------------------------------------------
 

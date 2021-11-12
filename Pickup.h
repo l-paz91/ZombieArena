@@ -6,8 +6,6 @@
 //--INCLUDES--//
 #include <SFML/Graphics.hpp>
 
-#include "std_lib_facilities.h"
-
 using namespace sf;
 
 // -----------------------------------------------------------------------------

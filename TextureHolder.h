@@ -6,7 +6,8 @@
 //--INCLUDES--//
 #include <SFML/Graphics.hpp>
 
-#include "std_lib_facilities.h"
+#include <map>
+#include <string>
 
 using namespace sf;
 
@@ -24,9 +25,9 @@ public:
 	TextureHolder(const TextureHolder&) = delete;
 	void operator=(const TextureHolder&) = delete;
 
-	static Texture& getTexture(const string& filename)
+	static Texture& getTexture(const std::string& filename)
 	{
-		map<string, Texture>& ref = getInstance().mTextures;
+		std::map<std::string, Texture>& ref = getInstance().mTextures;
 		auto it = ref.find(filename);
 		if (it != ref.end())
 		{
@@ -43,7 +44,7 @@ public:
 private:
 	TextureHolder() {}
 
-	map<string, Texture> mTextures;
+	std::map<std::string, Texture> mTextures;
 };
 
 // -----------------------------------------------------------------------------

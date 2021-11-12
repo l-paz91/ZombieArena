@@ -8,6 +8,7 @@
 
 #include "Zombie.h"
 
+#include "std_lib_facilities.h"
 // -----------------------------------------------------------------------------
 
 using namespace sf;
@@ -19,7 +20,7 @@ struct ZombieArena
 		// clean up vector
 		if (!mv_Zombies.empty())
 		{
-			for (uint32 i = 0; i < mv_Zombies.size(); ++i)
+			for (uint32_t i = 0; i < mv_Zombies.size(); ++i)
 			{
 				delete mv_Zombies[i];
 				mv_Zombies[i] = nullptr;
@@ -30,7 +31,10 @@ struct ZombieArena
 	int createBackground(VertexArray& pVA, IntRect pArena);
 	void createHorde(int pNumZombies, IntRect pArena);
 
-	vector<Zombie*> mv_Zombies;
+	void loadHiScoreFromFile(int& pHiScore);
+	void writeHiScoreToFile(int pHiScore);
+
+	Vector<Zombie*> mv_Zombies;
 };
 
 // -----------------------------------------------------------------------------

@@ -1,10 +1,12 @@
 // -----------------------------------------------------------------------------
 
 //--INCLUDES--//
+
 #include "Bullet.h"
 #include "HUD.h"
 #include "Pickup.h"
 #include "Player.h"
+#include "SoundManager.h"
 #include "TextureHolder.h"
 #include "ZombieArena.h"
 
@@ -22,7 +24,7 @@ int main()
 
 	Vector2f resolution((float)VideoMode::getDesktopMode().width, (float)VideoMode::getDesktopMode().height);
 
-	RenderWindow window(VideoMode((int)resolution.x, (int)resolution.y), "Zombie Arena", Style::Fullscreen);
+	RenderWindow window(VideoMode((int)resolution.x, (int)resolution.y), "Zombie Arena", Style::Default);
 
 	View mainView(FloatRect(0, 0, resolution.x, resolution.y));
 
@@ -45,8 +47,7 @@ int main()
 	int numZombiesAlive = 0;
 
 	// prepare bullets @TODO - this should be a weapon class
-	vector<Bullet> vBullets(100);
-	int currentBullet = 0;
+	vector<Bullet> vBullets;
 	int bulletsSpare = 24;
 	int bulletsInClip = 6;
 	int clipSize = 6;
@@ -67,9 +68,15 @@ int main()
 	Pickup healthPickUp(1);
 	Pickup ammoPickUp(2);
 
+	// create the arena
+	ZombieArena zombieArena;
+	const int ARENA_WIDTH = 500;
+	const int ARENA_HEIGHT = 500;
+
 	// game info
 	int score = 0;
 	int hiScore = 0;
+	zombieArena.loadHiScoreFromFile(hiScore);	
 	int wave = 0;
 
 	// create the HUD
@@ -78,11 +85,10 @@ int main()
 	int fpsFrameInterval = 1000;
 	hud.updateAmmoText(bulletsInClip, bulletsSpare);
 	hud.updateScoreText(score);
+	hud.updateHiScoreText(hiScore);
 
-	// create the arena
-	ZombieArena zombieArena;
-	const int ARENA_WIDTH = 1000;
-	const int ARENA_HEIGHT = 1000;
+	// create sound manager
+	SoundManager soundManager;
 
 	while (window.isOpen())
 	{
@@ -109,6 +115,17 @@ int main()
 				else if (event.key.code == Keyboard::Return && gameState == State::eGAMEOVER)
 				{
 					gameState = State::eLEVELING_UP;
+
+					wave = 0;
+					score = 0;
+
+					// prepare gun and ammo for the next game
+					bulletsSpare = 24;
+					bulletsInClip = 6;
+					//clipSize = 6;
+					//fireRate = 1;
+
+					// reset players stats?
 				}
 
 				if (gameState == State::ePLAYING)
@@ -126,10 +143,11 @@ int main()
 						{
 							bulletsInClip = bulletsSpare;
 							bulletsSpare = 0;
+							soundManager.mReload.play();
 						}
 						else
 						{
-							// ?
+							soundManager.mReloadFailed.play();
 						}
 
 						// update HUD
@@ -190,24 +208,28 @@ int main()
 				if (gameTimeTotal.asMilliseconds() - fireButtonLastPressed.asMilliseconds()
 					> 1000 / fireRate && bulletsInClip > 0)
 				{
+					// load a bullet into the vector
+					vBullets.push_back(Bullet());
+					vector<Bullet>::iterator currentBulletIt = vBullets.end() - 1;
+
 					// pass centre of player and cross-hair to shoot function
-					vBullets[currentBullet].shoot(
+					currentBulletIt->shoot(
 						player.getCenter().x, player.getCenter().y,
 						mouseWorldPos.x, mouseWorldPos.y);
 
-					++currentBullet;
-
-					if (currentBullet > 99)
-					{
-						currentBullet = 0;
-					}
-
 					fireButtonLastPressed = gameTimeTotal;
 					--bulletsInClip;
+					soundManager.mShoot.play();
 
 					// update HUD
 					hud.updateAmmoText(bulletsInClip, bulletsSpare);
 				} 
+
+				if (gameTimeTotal.asMilliseconds() - fireButtonLastPressed.asMilliseconds()
+					> 1000 / fireRate && bulletsInClip == 0)
+				{
+					soundManager.mReloadFailed.play();
+				}
 
 			} // end fire a bullet
 
@@ -218,39 +240,58 @@ int main()
 		{
 			if (event.key.code == Keyboard::Num1)
 			{
+				// increase fire rate
+				++fireRate;
+
 				gameState = State::ePLAYING;
 			}
 
 			if (event.key.code == Keyboard::Num2)
 			{
+				// increase clip size
+				clipSize += clipSize;
+
 				gameState = State::ePLAYING;
 			}
 
 			if (event.key.code == Keyboard::Num3)
 			{
+				// increase health
+				player.upgradeHealth();
+
 				gameState = State::ePLAYING;
 			}
 
 			if (event.key.code == Keyboard::Num4)
 			{
+				// increase speed
+				player.upgradeSpeed();
+
 				gameState = State::ePLAYING;
 			}
 
 			if (event.key.code == Keyboard::Num5)
 			{
+				// upgrade pickup
+				healthPickUp.upgrade();
+
 				gameState = State::ePLAYING;
 			}
 
 			if (event.key.code == Keyboard::Num6)
 			{
+				// upgrade pickup
+				ammoPickUp.upgrade();
 				gameState = State::ePLAYING;
 			}
 
 			if (gameState == State::ePLAYING)
 			{
+				++wave;
+
 				// prepare the level
-				arena.width = ARENA_WIDTH;
-				arena.height = ARENA_HEIGHT;
+				arena.width = ARENA_WIDTH * wave;
+				arena.height = ARENA_HEIGHT * wave;
 				arena.left = 0;
 				arena.top = 0;
 
@@ -264,9 +305,12 @@ int main()
 				ammoPickUp.setArena(arena);
 
 				// create horde of zombies
-				numZombies = 10;
+				numZombies = 5 * wave;
 				zombieArena.createHorde(numZombies, arena);
 				numZombiesAlive = numZombies;
+
+				// player power up sound
+				soundManager.mPowerup.play();
 
 				// reset clock
 				clock.restart();
@@ -356,6 +400,8 @@ int main()
 								{
 									gameState = State::eLEVELING_UP;
 								}
+
+								soundManager.mSplat.play();
 							}
 						}
 					}
@@ -369,12 +415,12 @@ int main()
 				{
 					if (player.hit(gameTimeTotal))
 					{
-						// more here later
+						soundManager.mHit.play();
 					}
 
 					if (player.getHealth() <= 0)
 					{
-						gameState = State::eGAMEOVER;
+						gameState = State::eGAMEOVER;						
 					}
 				}
 			} // end player touched
@@ -383,6 +429,7 @@ int main()
 			if (player.getPos().intersects(healthPickUp.getPos()) && healthPickUp.hasSpawned())
 			{
 				player.increaseHealthLevel(healthPickUp.pickUp());
+				soundManager.mPickup.play();
 			}
 
 			// has player touched ammo pickup
@@ -392,6 +439,8 @@ int main()
 
 				// update HUD
 				hud.updateAmmoText(bulletsInClip, bulletsSpare);
+
+				soundManager.mPickup.play();
 			}
 
 			// update the health bar
@@ -455,10 +504,10 @@ int main()
 
 		if (gameState == State::eGAMEOVER)
 		{
+			zombieArena.writeHiScoreToFile(hiScore);
+
 			window.draw(hud.msGameOver);
 			window.draw(hud.mGameOverText);
-			window.draw(hud.mScoreText);
-			window.draw(hud.mHiScoreText);
 		}
 
 		window.display();

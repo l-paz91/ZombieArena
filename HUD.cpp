@@ -4,6 +4,7 @@
 #include "HUD.h"
 
 #include "TextureHolder.h"
+#include "std_lib_facilities.h"
 
 // -----------------------------------------------------------------------------
 
@@ -36,7 +37,7 @@ Hud::Hud(float pResX, float pResY)
 	mDebugFont.loadFromFile("fonts/javatext.ttf");
 
 	setUpText(mPausedText, mFont, 155, 400, 400, "Press Enter \nto continue");
-	setUpText(mGameOverText, mFont, 80, 150, 250, "Press Enter to play");
+	setUpText(mGameOverText, mFont, 155, (pResX/2)-50, 700, "Press Enter to play");
 
 	stringstream ss;
 	ss  << "1 - Increased rate of fire"

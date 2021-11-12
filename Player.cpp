@@ -5,11 +5,13 @@
 
 #include "TextureHolder.h"
 
+#include "std_lib_facilities.h"
+
 // -----------------------------------------------------------------------------
 
 Player::Player()
 	: mStartSpeed(200)
-	, mStartHealth(1000)
+	, mStartHealth(200)
 	, mSpeed(mStartSpeed)
 	, mTileSize(50)
 	, mHealth((int)mStartHealth)

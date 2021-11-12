@@ -6,7 +6,7 @@
 //--INCLUDES--//
 #include <SFML/Graphics.hpp>
 
-#include "std_lib_facilities.h"
+#include <string>
 
 using namespace sf;
 
@@ -53,7 +53,7 @@ struct Hud
 
 private:
 	void setUpText(Text& pText, const Font& pFont, int pCharSize, float pX,
-		float pY, const string& pString = "", const Color& pColour = Color::White);
+		float pY, const std::string& pString = "", const Color& pColour = Color::White);
 };
 
 // -----------------------------------------------------------------------------

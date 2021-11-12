@@ -199,7 +199,7 @@ private:
 // -----------------------------------------------------------------------------
 
 // trivially range-checked string (no iterator checking):
-struct String : std::string {
+struct MyString : std::string {
 	using size_type = std::string::size_type;
 	//	using string::string;
 
@@ -218,9 +218,9 @@ struct String : std::string {
 
 namespace std {
 
-	template<> struct hash<String>
+	template<> struct hash<MyString>
 	{
-		size_t operator()(const String& s) const
+		size_t operator()(const MyString& s) const
 		{
 			return hash<std::string>()(s);
 		}

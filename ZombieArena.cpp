@@ -139,6 +139,31 @@ void ZombieArena::createHorde(int pNumZombies, IntRect pArena)
 }
 
 // -----------------------------------------------------------------------------
+
+void ZombieArena::loadHiScoreFromFile(int& pHiScore)
+{
+	ifstream readIn{ "gamedata/scores.txt" };
+	if (!readIn)
+	{
+		cout << "Error opening file";
+	}
+
+	readIn >> pHiScore;
+}
+
+// -----------------------------------------------------------------------------
+
+void ZombieArena::writeHiScoreToFile(int pHiScore)
+{
+	ofstream readOut{ "gamedata/scores.txt" };
+	if (!readOut)
+	{
+		cout << "Error opening file";
+	}
+	readOut << pHiScore;
+}
+
+// -----------------------------------------------------------------------------
 // -----------------------------------------------------------------------------
 // -----------------------------------------------------------------------------
 
